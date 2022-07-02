@@ -12,7 +12,7 @@ import react.dom.html.ReactHTML.h2
 import react.useState
 
 val Gradebook = FC<Props> {
-    val grades: MutableMap<Subject, Double> by useState(mutableMapOf(
+    var gradesMap: LinkedHashMap<Subject, Double> by useState(linkedMapOf(
         Subject.ART to 0.0,
         Subject.ENGLISH to 0.0,
         Subject.HISTORY to 0.0,
@@ -23,10 +23,8 @@ val Gradebook = FC<Props> {
 
     val checkAnswer = { subject: Subject, answer: String ->
         if (Answers[subject] == answer) {
-            grades[subject] = 100.0
-            window.alert("Correct! Your grade in ${subject.displayName} is ${grades[subject]}%!")
-        } else {
-            window.alert("Incorrect! Your grade in ${subject.displayName} is ${grades[subject]}%!")
+            gradesMap[subject] = 100.0
+            gradesMap = LinkedHashMap(gradesMap)
         }
     }
 
@@ -52,6 +50,18 @@ val Gradebook = FC<Props> {
             }
             Assignments {
                 onAnswerSubmit = checkAnswer
+            }
+        }
+        div {
+            css {
+                flex = 50.pct
+                padding = 10.px
+            }
+            h2 {
+                +"Grades"
+            }
+            Grades {
+                grades = gradesMap
             }
         }
     }
