@@ -2,7 +2,6 @@ import csstype.Display
 import csstype.pct
 import csstype.px
 import csstype.rgb
-import kotlinx.browser.window
 import react.FC
 import react.Props
 import react.css.css
@@ -10,6 +9,15 @@ import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.dom.html.ReactHTML.h2
 import react.useState
+
+val expectedPoints = linkedMapOf(
+    Subject.ART to 100.0,
+    Subject.ENGLISH to 100.0,
+    Subject.HISTORY to 100.0,
+    Subject.MATH to 100.0,
+    Subject.SCIENCE to 100.0,
+    Subject.EXTRACREDIT to 25.0
+)
 
 val Gradebook = FC<Props> {
     var gradesMap: LinkedHashMap<Subject, Double> by useState(linkedMapOf(
@@ -22,8 +30,13 @@ val Gradebook = FC<Props> {
     ))
 
     val checkAnswer = { subject: Subject, answer: String ->
-        if (Answers[subject] == answer) {
-            gradesMap[subject] = 100.0
+        if (Answers[subject] == answer.lowercase()) {
+            if (subject == Subject.EXTRACREDIT) {
+                gradesMap[subject] = 25.0
+            } else {
+                gradesMap[subject] = 100.0
+            }
+            // We need to reassign gradesMap so the React knows to re-render the page
             gradesMap = LinkedHashMap(gradesMap)
         }
     }

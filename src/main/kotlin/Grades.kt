@@ -28,6 +28,6 @@ external interface GradeProps : Props {
 
 val Grade = FC<GradeProps> { props ->
     h3 {
-        +"${props.subject.displayName}: ${props.grade}%"
+        +"${props.subject.displayName}: ${(props.grade / expectedPoints[props.subject]!! * 100)}%"
     }
 }

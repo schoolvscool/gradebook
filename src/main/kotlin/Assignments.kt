@@ -2,6 +2,7 @@ import csstype.px
 import react.FC
 import react.Props
 import react.css.css
+import react.dom.html.AutoComplete
 import react.dom.html.InputType
 import react.dom.html.ReactHTML.br
 import react.dom.html.ReactHTML.h3
@@ -49,6 +50,7 @@ val Assignment = FC<AssignmentProps> { props ->
                 props.onAnswerSubmit(props.subject, answer)
             }
         }
+        autoComplete = AutoComplete.off
     }
     input {
         css {
