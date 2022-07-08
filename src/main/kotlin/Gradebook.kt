@@ -2,6 +2,7 @@ import csstype.Display
 import csstype.pct
 import csstype.px
 import csstype.rgb
+import org.w3c.dom.Audio
 import react.FC
 import react.Props
 import react.css.css
@@ -19,6 +20,8 @@ val expectedPoints = linkedMapOf(
     Subject.EXTRACREDIT to 25.0
 )
 
+val nggyu = Audio("nggyu.wav")
+
 val Gradebook = FC<Props> {
     var gradesMap: LinkedHashMap<Subject, Double> by useState(linkedMapOf(
         Subject.ART to 0.0,
@@ -33,6 +36,7 @@ val Gradebook = FC<Props> {
         if (Answers[subject] == answer.lowercase()) {
             if (subject == Subject.EXTRACREDIT) {
                 gradesMap[subject] = 25.0
+                nggyu.play()
             } else {
                 gradesMap[subject] = 100.0
             }
