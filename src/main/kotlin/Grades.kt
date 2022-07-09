@@ -1,23 +1,23 @@
+import csstype.Border
+import csstype.LineStyle
+import csstype.px
+import csstype.rgb
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML.h3
+import react.css.css
+import react.dom.html.ReactHTML.td
+import react.dom.html.ReactHTML.tr
 
 external interface GradesProps : Props {
     var grades: LinkedHashMap<Subject, Double>
 }
 
 val Grades = FC<GradesProps> { props ->
-    var totalGrade  = 0.0
-
     for (sub in props.grades.keys) {
-        totalGrade += props.grades[sub]!!
         Grade {
             subject = sub
             grade = props.grades[sub]!!
         }
-    }
-    h3 {
-        +"Final Grade: ${totalGrade / (props.grades.size - 1)}%"
     }
 }
 
@@ -27,7 +27,26 @@ external interface GradeProps : Props {
 }
 
 val Grade = FC<GradeProps> { props ->
-    h3 {
-        +"${props.subject.displayName}: ${(props.grade / expectedPoints[props.subject]!! * 100)}%"
+
+    tr {
+        css {
+            nthChild("even") {
+                backgroundColor = rgb(242, 242, 242)
+            }
+        }
+        td {
+            css {
+                border = Border(1.px, LineStyle.solid, rgb(221, 221, 221))
+                padding = 8.px
+            }
+            +props.subject.displayName
+        }
+        td {
+            css {
+                border = Border(1.px, LineStyle.solid, rgb(221, 221, 221))
+                padding = 8.px
+            }
+            +"${(props.grade / expectedPoints[props.subject]!! * 100)}%"
+        }
     }
 }
