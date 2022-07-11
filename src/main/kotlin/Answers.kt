@@ -1,8 +1,8 @@
 val Answers = mapOf(
-    Subject.ART to Subject.ART.displayName.lowercase(),
-    Subject.ENGLISH to Subject.ENGLISH.displayName.lowercase(),
-    Subject.HISTORY to Subject.HISTORY.displayName.lowercase(),
-    Subject.MATH to Subject.MATH.displayName.lowercase(),
-    Subject.SCIENCE to Subject.SCIENCE.displayName.lowercase(),
+    Subject.ART to "1968",
+    Subject.ENGLISH to "the mortified times ceaselessly equal",
+    Subject.HISTORY to "lighthouse",
+    Subject.MATH to "101",
+    Subject.SCIENCE to "temperature",
     Subject.EXTRACREDIT to "never gonna give you up"
 )
