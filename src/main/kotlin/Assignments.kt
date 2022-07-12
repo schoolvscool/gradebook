@@ -11,6 +11,8 @@ import react.useState
 
 external interface AssignmentsProps : Props {
     var onAnswerSubmit: (Subject, String) -> Unit
+    var pointsMap: Map<Subject, Double>
+    var creditMap: Map<Subject, Double>
 }
 
 val Assignments = FC<AssignmentsProps> { props ->
@@ -18,6 +20,8 @@ val Assignments = FC<AssignmentsProps> { props ->
         Assignment {
             subject = subjectEnum
             onAnswerSubmit = props.onAnswerSubmit
+            maximumPoints = props.pointsMap[subjectEnum]!!
+            maximumCredit = props.creditMap[subjectEnum]!!
         }
     }
 }
@@ -25,6 +29,8 @@ val Assignments = FC<AssignmentsProps> { props ->
 external interface AssignmentProps : Props {
     var subject: Subject
     var onAnswerSubmit: (Subject, String) -> Unit
+    var maximumPoints: Double
+    var maximumCredit: Double
 }
 
 val Assignment = FC<AssignmentProps> { props ->
@@ -37,9 +43,15 @@ val Assignment = FC<AssignmentProps> { props ->
             }
             +props.subject.displayName
         }
+        div {
+            css {
+                marginBottom = 0.4.rem
+            }
+            +"Points available: ${props.maximumCredit}/${props.maximumPoints}"
+        }
         input {
             css {
-
+                marginRight = 1.rem
             }
             onChange = { event ->
                 answer = event.target.value

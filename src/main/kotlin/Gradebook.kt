@@ -14,6 +14,19 @@ import react.dom.html.ReactHTML.th
 import react.dom.html.ReactHTML.tr
 import react.useState
 
+// TODO: use this data class instead of individual maps
+data class SubjectData(
+    var grade: Double,
+    var expectedPoints: Double,
+    var maxCredit: Double,
+    var numTries: Int
+)
+
+data class PopupData(
+    val isOpen: Boolean,
+    val state: PopupState
+)
+
 val expectedPoints = linkedMapOf(
     Subject.ART to 100.0,
     Subject.ENGLISH to 100.0,
@@ -25,6 +38,24 @@ val expectedPoints = linkedMapOf(
 
 val nggyu = Audio("nggyu.wav")
 
+var allowedTriesMap = linkedMapOf(
+    Subject.ART to 3,
+    Subject.ENGLISH to 3,
+    Subject.HISTORY to 3,
+    Subject.MATH to 3,
+    Subject.SCIENCE to 3,
+    Subject.EXTRACREDIT to 3
+)
+
+var maximumCreditMap = linkedMapOf(
+    Subject.ART to 100.0,
+    Subject.ENGLISH to 100.0,
+    Subject.HISTORY to 100.0,
+    Subject.MATH to 100.0,
+    Subject.SCIENCE to 100.0,
+    Subject.EXTRACREDIT to 25.0
+)
+
 val Gradebook = FC<Props> {
     var gradesMap: LinkedHashMap<Subject, Double> by useState(linkedMapOf(
         Subject.ART to 0.0,
@@ -35,16 +66,26 @@ val Gradebook = FC<Props> {
         Subject.EXTRACREDIT to 0.0
     ))
 
-    val checkAnswer = { subject: Subject, answer: String ->
+    var popupData: PopupData by useState(PopupData(false, PopupState(false, 3)))
+
+    val checkAnswer = fun(subject: Subject, answer: String) {
+        if (gradesMap[subject]!! > 0.0) {
+            return
+        }
         if (Answers[subject] == answer.lowercase()) {
+            popupData = PopupData(true, PopupState(true, allowedTriesMap[subject]!!))
             if (subject == Subject.EXTRACREDIT) {
-                gradesMap[subject] = 25.0
                 nggyu.play()
-            } else {
-                gradesMap[subject] = 100.0
             }
+            gradesMap[subject] = maximumCreditMap[subject]!!
             // We need to reassign gradesMap so the React knows to re-render the page
             gradesMap = LinkedHashMap(gradesMap)
+        } else {
+            allowedTriesMap[subject] = allowedTriesMap[subject]!! - 1
+            if (allowedTriesMap[subject]!! <= 0) {
+                maximumCreditMap[subject] = maximumCreditMap[subject]!! - (0.1 * expectedPoints[subject]!!)
+            }
+            popupData = PopupData(true, PopupState(false, allowedTriesMap[subject]!!))
         }
     }
 
@@ -55,6 +96,16 @@ val Gradebook = FC<Props> {
             fontFamily = FontFamily.sansSerif
             padding = 1.rem
         }
+
+        if (popupData.isOpen) {
+            Popup {
+                state = popupData.state
+                handleClose = {
+                    popupData = PopupData(false, popupData.state)
+                }
+            }
+        }
+
         h1 {
             css {
                 marginTop = 0.px
@@ -87,6 +138,8 @@ val Gradebook = FC<Props> {
                 }
                 Assignments {
                     onAnswerSubmit = checkAnswer
+                    pointsMap = expectedPoints
+                    creditMap = maximumCreditMap
                 }
             }
             section {
