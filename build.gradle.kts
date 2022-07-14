@@ -1,5 +1,6 @@
 plugins {
     kotlin("js") version "1.6.21"
+    id("io.github.turansky.kfc.legacy-union") version "5.8.0"
 }
 
 group = "me.nathaniellow"
