@@ -4,7 +4,6 @@ import org.w3c.dom.Audio
 import react.FC
 import react.Props
 import react.css.css
-import react.dom.html.ReactHTML.body
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
@@ -61,7 +60,7 @@ var maximumCreditMap = linkedMapOf(
     Subject.EXTRACREDIT to 25.0
 )
 
-const val timeLimit = 2 * 1000 * 60
+const val timeLimit = 40 * 1000 * 60
 
 val Gradebook = FC<Props> {
     var gradesMap: LinkedHashMap<Subject, Double> by useState(linkedMapOf(
@@ -78,13 +77,12 @@ val Gradebook = FC<Props> {
     var startTime: Date by useState(Date())
     var time: Date by useState(Date())
     var timeStarted: Boolean by useState(false)
-    var timeEnded = false
+    var timeEnded: Boolean by useState(false)
 
     var interval = 0
 
     val checkAnswer = fun(subject: Subject, answer: String) {
         if (gradesMap[subject]!! > 0.0) {
-            timeEnded = true
             return
         }
         if (Answers[subject] == answer.lowercase()) {
@@ -104,14 +102,22 @@ val Gradebook = FC<Props> {
         }
     }
 
-    var totalGrade = 0.0
-
-    if (popupData.isOpen) {
+    if (popupData.isOpen && !timeEnded) {
         Popup {
             state = popupData.state
             handleClose = {
                 popupData = PopupData(false, popupData.state)
             }
+        }
+    }
+
+    if (timeEnded) {
+        EndPopup {
+            var totalGrade = 0.0
+            for (sub in gradesMap.keys) {
+                totalGrade += gradesMap[sub]!!
+            }
+            finalGrade = totalGrade / (gradesMap.size - 1)
         }
     }
 
@@ -210,6 +216,7 @@ val Gradebook = FC<Props> {
                             fontWeight = FontWeight(600)
                         }
 
+                        var totalGrade = 0.0
                         for (sub in gradesMap.keys) {
                             totalGrade += gradesMap[sub]!!
                         }
@@ -247,18 +254,21 @@ val Gradebook = FC<Props> {
                     }
                     hidden = timeStarted
                 }
+
                 val elapsedTime = time.getTime() - startTime.getTime()
                 val remainingTime = timeLimit - elapsedTime
-                if (timeStarted && ceil(remainingTime / 1000) <= 0) {
+                if (timeStarted && ceil(remainingTime / 1000) <= 0 && !timeEnded) {
                     window.clearInterval(interval)
-                    timeEnded = !timeEnded
+                    timeEnded = true
                 }
+
                 val minutes = floor(remainingTime / 1000 / 60)
                 val seconds = ceil(remainingTime / 1000 % 60)
                 var minutesString = if (minutes >= 10) "$minutes" else "0${minutes}"
                 if (minutes < 0) minutesString = "00"
                 var secondsString = if (seconds >= 10) "$seconds" else "0${seconds}"
                 if (seconds < 0 || seconds == 60.0) secondsString = "00"
+
                 +"${minutesString}:${secondsString}"
             }
         }
