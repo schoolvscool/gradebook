@@ -6,3 +6,11 @@ val Answers = mapOf(
     Subject.SCIENCE to "temperature",
     Subject.EXTRACREDIT to "never gonna give you up"
 )
+
+val Hints = mapOf(
+    Subject.ART to "You're looking for a number",
+    Subject.ENGLISH to "You're looking for a phrase",
+    Subject.MATH to "You're looking for a number",
+    Subject.SCIENCE to "You're looking for a word",
+    Subject.EXTRACREDIT to "You're looking for a phrase"
+)

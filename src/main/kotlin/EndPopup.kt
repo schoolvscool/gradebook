@@ -21,6 +21,9 @@ val EndPopup = FC<EndPopupProps> { props ->
             top = 0.px
             left = 0.px
         }
+        mozart.pause()
+        nggyu.load()
+        nggyu.play()
         div {
             css {
                 position = Position.relative

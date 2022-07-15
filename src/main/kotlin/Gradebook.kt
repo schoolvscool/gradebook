@@ -18,12 +18,13 @@ import kotlin.js.Date
 import kotlin.math.ceil
 import kotlin.math.floor
 
-// TODO: use this data class instead of individual maps
 data class SubjectData(
     var grade: Double,
     var expectedPoints: Double,
     var maxCredit: Double,
-    var numTries: Int
+    var numTries: Int,
+    var showHint: Boolean,
+    var showAnswer: Boolean
 )
 
 data class PopupData(
@@ -31,47 +32,22 @@ data class PopupData(
     val state: PopupState
 )
 
-val expectedPoints = linkedMapOf(
-    Subject.ART to 100.0,
-    Subject.ENGLISH to 100.0,
-    Subject.HISTORY to 100.0,
-    Subject.MATH to 100.0,
-    Subject.SCIENCE to 100.0,
-    Subject.EXTRACREDIT to 25.0
-)
-
 val nggyu = Audio("nggyu.wav")
+val mozart = Audio("EineKleineNachtmusik_short.mp3")
 
-var allowedTriesMap = linkedMapOf(
-    Subject.ART to 3,
-    Subject.ENGLISH to 3,
-    Subject.HISTORY to 3,
-    Subject.MATH to 3,
-    Subject.SCIENCE to 3,
-    Subject.EXTRACREDIT to 3
-)
-
-var maximumCreditMap = linkedMapOf(
-    Subject.ART to 100.0,
-    Subject.ENGLISH to 100.0,
-    Subject.HISTORY to 100.0,
-    Subject.MATH to 100.0,
-    Subject.SCIENCE to 100.0,
-    Subject.EXTRACREDIT to 25.0
-)
-
-const val timeLimit = 1 * 1000 * 60
+const val timeLimit = 3 * 1000 * 60
 
 var interval = 0
+var countdownStarted = false
 
 val Gradebook = FC<Props> {
-    var gradesMap: LinkedHashMap<Subject, Double> by useState(linkedMapOf(
-        Subject.ART to 0.0,
-        Subject.ENGLISH to 0.0,
-        Subject.HISTORY to 0.0,
-        Subject.MATH to 0.0,
-        Subject.SCIENCE to 0.0,
-        Subject.EXTRACREDIT to 0.0
+    var subjectMap: LinkedHashMap<Subject, SubjectData> by useState(linkedMapOf(
+        Subject.ART to SubjectData(0.0, 100.0, 100.0, 3, showHint = false, showAnswer = false),
+        Subject.ENGLISH to SubjectData(0.0, 100.0, 100.0, 3, showHint = false, showAnswer = false),
+        Subject.HISTORY to SubjectData(0.0, 100.0, 100.0, 3, showHint = false, showAnswer = false),
+        Subject.MATH to SubjectData(0.0, 100.0, 100.0, 3, showHint = false, showAnswer = false),
+        Subject.SCIENCE to SubjectData(0.0, 100.0, 100.0, 3, showHint = false, showAnswer = false),
+        Subject.EXTRACREDIT to SubjectData(0.0, 25.0, 25.0, 3, showHint = false, showAnswer = false)
     ))
 
     var allAnswered: Boolean by useState(false)
@@ -85,22 +61,25 @@ val Gradebook = FC<Props> {
 
 
     val checkAnswer = fun(subject: Subject, answer: String) {
-        if (gradesMap[subject]!! > 0.0) {
+        if (subjectMap[subject]!!.grade > 0.0) {
             return
         }
         if (Answers[subject] == answer.lowercase()) {
-            popupData = PopupData(true, PopupState(true, allowedTriesMap[subject]!!))
+            popupData = PopupData(true, PopupState(true, subjectMap[subject]!!.numTries))
             if (subject == Subject.EXTRACREDIT) {
+                mozart.pause()
+                nggyu.load()
                 nggyu.play()
             }
-            gradesMap[subject] = maximumCreditMap[subject]!!
-            // We need to reassign gradesMap so the React knows to re-render the page
-            gradesMap = LinkedHashMap(gradesMap)
+            subjectMap[subject]!!.grade = subjectMap[subject]!!.maxCredit
+            subjectMap[subject]!!.showHint = false
+            subjectMap[subject]!!.showAnswer = true
+            // We need to reassign subjectMap so the React knows to re-render the page
+            subjectMap = LinkedHashMap(subjectMap)
 
             var unanswered = false
             for (subjectEnum in Subject.values()) {
-                println(gradesMap[subjectEnum])
-                if (gradesMap[subjectEnum] == 0.0) {
+                if (subjectMap[subjectEnum]!!.grade == 0.0) {
                     unanswered = true
                     break
                 }
@@ -109,11 +88,13 @@ val Gradebook = FC<Props> {
                 allAnswered = true
             }
         } else {
-            allowedTriesMap[subject] = allowedTriesMap[subject]!! - 1
-            if (allowedTriesMap[subject]!! <= 0) {
-                maximumCreditMap[subject] = maximumCreditMap[subject]!! - (0.1 * expectedPoints[subject]!!)
+            subjectMap[subject]!!.numTries = subjectMap[subject]!!.numTries - 1
+            if (subjectMap[subject]!!.numTries <= 0) {
+                subjectMap[subject]!!.maxCredit = subjectMap[subject]!!.maxCredit - (0.1 * subjectMap[subject]!!.expectedPoints)
+                subjectMap[subject]!!.showHint = true
             }
-            popupData = PopupData(true, PopupState(false, allowedTriesMap[subject]!!))
+            popupData = PopupData(true, PopupState(false, subjectMap[subject]!!.numTries))
+            subjectMap = LinkedHashMap(subjectMap)
         }
     }
 
@@ -129,10 +110,10 @@ val Gradebook = FC<Props> {
     if (timeEnded || allAnswered) {
         EndPopup {
             var totalGrade = 0.0
-            for (sub in gradesMap.keys) {
-                totalGrade += gradesMap[sub]!!
+            for (sub in subjectMap.keys) {
+                totalGrade += subjectMap[sub]!!.grade
             }
-            finalGrade = totalGrade / (gradesMap.size - 1)
+            finalGrade = totalGrade / (subjectMap.size - 1)
         }
     }
 
@@ -168,8 +149,7 @@ val Gradebook = FC<Props> {
             }
             Assignments {
                 onAnswerSubmit = checkAnswer
-                pointsMap = expectedPoints
-                creditMap = maximumCreditMap
+                subjectDataMap = subjectMap
             }
         }
         section {
@@ -215,7 +195,7 @@ val Gradebook = FC<Props> {
                         }
                     }
                     Grades {
-                        grades = gradesMap
+                        grades = subjectMap
                     }
                 }
                 div {
@@ -232,10 +212,10 @@ val Gradebook = FC<Props> {
                         }
 
                         var totalGrade = 0.0
-                        for (sub in gradesMap.keys) {
-                            totalGrade += gradesMap[sub]!!
+                        for (sub in subjectMap.keys) {
+                            totalGrade += subjectMap[sub]!!.grade
                         }
-                        +"${totalGrade / (gradesMap.size - 1)}%"
+                        +"${totalGrade / (subjectMap.size - 1)}%"
                     }
                 }
             }
@@ -278,6 +258,12 @@ val Gradebook = FC<Props> {
                 }
 
                 val minutes = floor(remainingTime / 1000 / 60)
+                if (minutes < 2 && !countdownStarted) {
+                    nggyu.pause()
+                    mozart.load()
+                    mozart.play()
+                    countdownStarted = true
+                }
                 val seconds = ceil(remainingTime / 1000 % 60)
                 var minutesString = if (minutes >= 10) "$minutes" else "0${minutes}"
                 if (minutes < 0) minutesString = "00"

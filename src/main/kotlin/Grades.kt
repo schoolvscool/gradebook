@@ -9,14 +9,15 @@ import react.dom.html.ReactHTML.td
 import react.dom.html.ReactHTML.tr
 
 external interface GradesProps : Props {
-    var grades: LinkedHashMap<Subject, Double>
+    var grades: LinkedHashMap<Subject, SubjectData>
 }
 
 val Grades = FC<GradesProps> { props ->
     for (sub in props.grades.keys) {
         Grade {
             subject = sub
-            grade = props.grades[sub]!!
+            grade = props.grades[sub]!!.grade
+            expectedPoints = props.grades[sub]!!.expectedPoints
         }
     }
 }
@@ -24,10 +25,10 @@ val Grades = FC<GradesProps> { props ->
 external interface GradeProps : Props {
     var subject: Subject
     var grade: Double
+    var expectedPoints: Double
 }
 
 val Grade = FC<GradeProps> { props ->
-
     tr {
         css {
             nthChild("even") {
@@ -46,7 +47,7 @@ val Grade = FC<GradeProps> { props ->
                 border = Border(1.px, LineStyle.solid, rgb(221, 221, 221))
                 padding = 8.px
             }
-            +"${(props.grade / expectedPoints[props.subject]!! * 100)}%"
+            +"${(props.grade / props.expectedPoints * 100)}%"
         }
     }
 }

@@ -11,8 +11,7 @@ import react.useState
 
 external interface AssignmentsProps : Props {
     var onAnswerSubmit: (Subject, String) -> Unit
-    var pointsMap: Map<Subject, Double>
-    var creditMap: Map<Subject, Double>
+    var subjectDataMap: Map<Subject, SubjectData>
 }
 
 val Assignments = FC<AssignmentsProps> { props ->
@@ -20,8 +19,10 @@ val Assignments = FC<AssignmentsProps> { props ->
         Assignment {
             subject = subjectEnum
             onAnswerSubmit = props.onAnswerSubmit
-            maximumPoints = props.pointsMap[subjectEnum]!!
-            maximumCredit = props.creditMap[subjectEnum]!!
+            maximumPoints = props.subjectDataMap[subjectEnum]!!.expectedPoints
+            maximumCredit = props.subjectDataMap[subjectEnum]!!.maxCredit
+            showHint = props.subjectDataMap[subjectEnum]!!.showHint
+            showAnswer = props.subjectDataMap[subjectEnum]!!.showAnswer
         }
     }
 }
@@ -31,6 +32,8 @@ external interface AssignmentProps : Props {
     var onAnswerSubmit: (Subject, String) -> Unit
     var maximumPoints: Double
     var maximumCredit: Double
+    var showHint: Boolean
+    var showAnswer: Boolean
 }
 
 val Assignment = FC<AssignmentProps> { props ->
@@ -48,6 +51,22 @@ val Assignment = FC<AssignmentProps> { props ->
                 marginBottom = 0.4.rem
             }
             +"Points available: ${props.maximumCredit}/${props.maximumPoints}"
+        }
+        if (props.showHint) {
+            div {
+                css {
+                    marginBottom = 0.4.rem
+                }
+                +"Hint: ${Hints[props.subject]}"
+            }
+        }
+        if (props.showAnswer) {
+            div {
+                css {
+                    marginBottom = 0.4.rem
+                }
+                +"Answer: ${Answers[props.subject]}"
+            }
         }
         input {
             css {
