@@ -60,7 +60,9 @@ var maximumCreditMap = linkedMapOf(
     Subject.EXTRACREDIT to 25.0
 )
 
-const val timeLimit = 40 * 1000 * 60
+const val timeLimit = 1 * 1000 * 60
+
+var interval = 0
 
 val Gradebook = FC<Props> {
     var gradesMap: LinkedHashMap<Subject, Double> by useState(linkedMapOf(
@@ -72,6 +74,8 @@ val Gradebook = FC<Props> {
         Subject.EXTRACREDIT to 0.0
     ))
 
+    var allAnswered: Boolean by useState(false)
+
     var popupData: PopupData by useState(PopupData(false, PopupState(false, 3)))
 
     var startTime: Date by useState(Date())
@@ -79,7 +83,6 @@ val Gradebook = FC<Props> {
     var timeStarted: Boolean by useState(false)
     var timeEnded: Boolean by useState(false)
 
-    var interval = 0
 
     val checkAnswer = fun(subject: Subject, answer: String) {
         if (gradesMap[subject]!! > 0.0) {
@@ -93,6 +96,18 @@ val Gradebook = FC<Props> {
             gradesMap[subject] = maximumCreditMap[subject]!!
             // We need to reassign gradesMap so the React knows to re-render the page
             gradesMap = LinkedHashMap(gradesMap)
+
+            var unanswered = false
+            for (subjectEnum in Subject.values()) {
+                println(gradesMap[subjectEnum])
+                if (gradesMap[subjectEnum] == 0.0) {
+                    unanswered = true
+                    break
+                }
+            }
+            if (!unanswered) {
+                allAnswered = true
+            }
         } else {
             allowedTriesMap[subject] = allowedTriesMap[subject]!! - 1
             if (allowedTriesMap[subject]!! <= 0) {
@@ -111,7 +126,7 @@ val Gradebook = FC<Props> {
         }
     }
 
-    if (timeEnded) {
+    if (timeEnded || allAnswered) {
         EndPopup {
             var totalGrade = 0.0
             for (sub in gradesMap.keys) {
@@ -267,7 +282,7 @@ val Gradebook = FC<Props> {
                 var minutesString = if (minutes >= 10) "$minutes" else "0${minutes}"
                 if (minutes < 0) minutesString = "00"
                 var secondsString = if (seconds >= 10) "$seconds" else "0${seconds}"
-                if (seconds < 0 || seconds == 60.0) secondsString = "00"
+                if (seconds == 60.0) secondsString = "00"
 
                 +"${minutesString}:${secondsString}"
             }
