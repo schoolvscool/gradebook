@@ -35,7 +35,7 @@ data class PopupData(
 val nggyu = Audio("nggyu.wav")
 val mozart = Audio("EineKleineNachtmusik_short.mp3")
 
-const val timeLimit = 3 * 1000 * 60
+const val timeLimit = 40 * 1000 * 60
 
 var interval = 0
 var countdownStarted = false
