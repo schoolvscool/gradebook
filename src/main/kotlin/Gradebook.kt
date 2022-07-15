@@ -61,7 +61,7 @@ val Gradebook = FC<Props> {
 
 
     val checkAnswer = fun(subject: Subject, answer: String) {
-        if (subjectMap[subject]!!.grade > 0.0) {
+        if (subjectMap[subject]!!.grade > 0.0 || answer.isBlank()) {
             return
         }
         if (Answers[subject] == answer.lowercase()) {
