@@ -9,6 +9,7 @@ import react.dom.html.ReactHTML.p
 
 external interface EndPopupProps : Props {
     var finalGrade: Double
+    var finalTime: String
 }
 
 val EndPopup = FC<EndPopupProps> { props ->
@@ -21,9 +22,12 @@ val EndPopup = FC<EndPopupProps> { props ->
             top = 0.px
             left = 0.px
         }
-        mozart.pause()
-        nggyu.load()
-        nggyu.play()
+        if (!endScreenShown) {
+            mozart.pause()
+            nggyu.load()
+            nggyu.play()
+            endScreenShown = true
+        }
         div {
             css {
                 position = Position.relative
@@ -44,8 +48,16 @@ val EndPopup = FC<EndPopupProps> { props ->
                 div {
                     css {
                         fontSize = 1.5.rem
+                        marginBottom = 0.4.rem
                     }
                     +"Your final grade: ${props.finalGrade}%"
+                }
+                div {
+                    css {
+                        fontSize = 1.5.rem
+                        marginBottom = 0.4.rem
+                    }
+                    +"Your final time: ${props.finalTime}"
                 }
             }
         }

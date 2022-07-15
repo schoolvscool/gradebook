@@ -39,6 +39,7 @@ const val timeLimit = 40 * 1000 * 60
 
 var interval = 0
 var countdownStarted = false
+var endScreenShown = false
 
 val Gradebook = FC<Props> {
     var subjectMap: LinkedHashMap<Subject, SubjectData> by useState(linkedMapOf(
@@ -108,12 +109,23 @@ val Gradebook = FC<Props> {
     }
 
     if (timeEnded || allAnswered) {
+        window.clearInterval(interval)
         EndPopup {
+            val elapsedTime = time.getTime() - startTime.getTime()
+            val minutes = floor(elapsedTime / 1000 / 60)
+            val seconds = floor(elapsedTime / 1000 % 60)
+            var minutesString = if (minutes >= 10) "$minutes" else "0${minutes}"
+            if (minutes < 0) minutesString = "00"
+            var secondsString = if (seconds >= 10) "$seconds" else "0${seconds}"
+            if (seconds == 60.0) secondsString = "00"
+
             var totalGrade = 0.0
             for (sub in subjectMap.keys) {
                 totalGrade += subjectMap[sub]!!.grade
             }
+
             finalGrade = totalGrade / (subjectMap.size - 1)
+            finalTime = "${minutesString}:${secondsString}"
         }
     }
 
@@ -262,7 +274,10 @@ val Gradebook = FC<Props> {
                 var minutesString = if (minutes >= 10) "$minutes" else "0${minutes}"
                 if (minutes < 0) minutesString = "00"
                 var secondsString = if (seconds >= 10) "$seconds" else "0${seconds}"
-                if (seconds == 60.0) secondsString = "00"
+                if (seconds == 60.0) {
+                    minutesString = "${minutes + 1}"
+                    secondsString = "00"
+                }
 
                 +"${minutesString}:${secondsString}"
             }
