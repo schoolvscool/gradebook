@@ -68,24 +68,26 @@ val Assignment = FC<AssignmentProps> { props ->
                 +"Answer: ${Answers[props.subject]}"
             }
         }
-        input {
-            css {
-                marginRight = 1.rem
+        if (!props.showAnswer) {
+            input {
+                css {
+                    marginRight = 1.rem
+                }
+                onChange = { event ->
+                    answer = event.target.value
+                }
+                onKeyDown = { event ->
+                    if (event.key == "Enter") {
+                        props.onAnswerSubmit(props.subject, answer)
+                    }
+                }
+                autoComplete = AutoComplete.off
             }
-            onChange = { event ->
-                answer = event.target.value
-            }
-            onKeyDown = { event ->
-                if (event.key == "Enter") {
+            input {
+                type = InputType.submit
+                onClick = {
                     props.onAnswerSubmit(props.subject, answer)
                 }
-            }
-            autoComplete = AutoComplete.off
-        }
-        input {
-            type = InputType.submit
-            onClick = {
-                props.onAnswerSubmit(props.subject, answer)
             }
         }
     }

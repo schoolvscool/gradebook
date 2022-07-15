@@ -220,12 +220,6 @@ val Gradebook = FC<Props> {
                 }
             }
         }
-    }
-    div {
-        css {
-            display = Display.flex
-            justifyContent = JustifyContent.spaceEvenly
-        }
         section {
             css {
                 padding = 2.rem
@@ -237,7 +231,7 @@ val Gradebook = FC<Props> {
                 css {
                     display = Display.flex
                     justifyContent = JustifyContent.spaceEvenly
-                    fontSize = 1.5.rem
+                    fontSize = 2.rem
                 }
                 button {
                     +"Start"
